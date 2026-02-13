@@ -6,7 +6,6 @@ on:
   pull_request:
 
 jobs:
-
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -14,38 +13,44 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '18'
-      - run: npm install
+          cache: 'npm' # Mempercepat build dengan cache
+      - run: npm ci # Lebih stabil untuk CI dibanding 'npm install'
       - run: npm run lint
 
-  test:
+  # Gabungkan test dan sonarqube di sini
+  analysis:
     runs-on: ubuntu-latest
     needs: lint
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Penting untuk SonarCloud agar bisa baca history git
+
       - uses: actions/setup-node@v4
         with:
           node-version: '18'
-      - run: npm install
-      - run: npm test -- --coverage
+          cache: 'npm'
+
+      - run: npm ci
+      
+      - name: Run Tests & Generate Coverage
+        run: npm test -- --coverage # Menghasilkan folder coverage/lcov.info
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        # Opsional: Jika masih error 'project not found', paksa lewat parameter:
+        # with:
+        #   args: >
+        #     -Dsonar.projectKey=Hildan1212_notes-app-sonar
+        #     -Dsonar.organization=Hildan1212
+
   k6:
     runs-on: ubuntu-latest
-    needs: sonarqube
+    needs: analysis # Tunggu analisis selesai
     steps:
       - uses: actions/checkout@v4
       - uses: grafana/k6-action@v0.2.0
         with:
           filename: loadtest/script.js
-          
-  sonarqube:
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-      - run: npm install
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v2
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
