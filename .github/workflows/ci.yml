@@ -38,18 +38,17 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install k6 via NPM
+      - name: Install & Start App
         run: |
-          npm install -g k6
           npm ci
-
-      - name: Start App & Run Load Test
-        run: |
           npm start & 
-          # Tunggu server sampai benar-benar nyala
           npx wait-on http://localhost:3000 --timeout 60000
-          # Panggil k6 pakai npx biar nggak 'command not found'
-          npx k6 run loadtest/script.js
+
+      - name: Run k6 Load Test
+        uses: grafana/k6-action@v0.5.0 # Gunakan versi terbaru
+        with:
+          filename: loadtest/script.js
+          flags: --address 0.0.0.0 # Opsional: memastikan binding
           
   sonarqube:
     runs-on: ubuntu-latest
