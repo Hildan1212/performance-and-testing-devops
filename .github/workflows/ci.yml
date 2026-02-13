@@ -36,19 +36,16 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20' # Mengatasi warning joi EBADENGINE
+          node-version: '20'
 
-      - name: Install k6 & dependencies
+      - name: Install k6 via NPM
         run: |
-          # Cara paling simpel: download binary k6 langsung
-          curl -L https://github.com | tar -xz
-          sudo mv k6-v0.49.0-linux-amd64/k6 /usr/local/bin/
+          npm install -g k6
           npm ci
 
       - name: Start App & Run Load Test
         run: |
           npm start & 
-          # Tunggu server sampai ready (maksimal 60 detik)
           npx wait-on http://localhost:3000 --timeout 60000
           k6 run loadtest/script.js
           
