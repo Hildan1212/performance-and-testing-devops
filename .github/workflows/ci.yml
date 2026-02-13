@@ -41,8 +41,8 @@ jobs:
       - name: Install & Start App
         run: |
           npm install
-          npm start &
-          npx wait-on http://localhost:3000
+          npm start & # Jalankan aplikasi di background pakai '&'
+          npx wait-on http://localhost:3000 # Tunggu sampai server benar-benar siap
         
       - name: Run k6 Load Test
         uses: grafana/k6-action@v0.2.0
