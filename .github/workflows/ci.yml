@@ -46,8 +46,10 @@ jobs:
       - name: Start App & Run Load Test
         run: |
           npm start & 
+          # Tunggu server sampai benar-benar nyala
           npx wait-on http://localhost:3000 --timeout 60000
-          k6 run loadtest/script.js
+          # Panggil k6 pakai npx biar nggak 'command not found'
+          npx k6 run loadtest/script.js
           
   sonarqube:
     runs-on: ubuntu-latest
