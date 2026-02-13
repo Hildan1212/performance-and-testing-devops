@@ -44,11 +44,16 @@ jobs:
           npm start & 
           npx wait-on http://localhost:3000 --timeout 60000
 
+      # 1. Install binary k6 terbaru
+      - name: Setup k6
+        uses: grafana/setup-k6-action@v1
+
+      # 2. Jalankan test menggunakan run-k6-action (pengganti k6-action)
       - name: Run k6 Load Test
-        uses: grafana/k6-action@v0.5.0 # Gunakan versi terbaru
+        uses: grafana/run-k6-action@v1
         with:
-          filename: loadtest/script.js
-          flags: --address 0.0.0.0 # Opsional: memastikan binding
+          path: loadtest/script.js
+          flags: --address 0.0.0.0
           
   sonarqube:
     runs-on: ubuntu-latest
