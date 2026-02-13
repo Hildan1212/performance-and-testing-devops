@@ -29,14 +29,26 @@ jobs:
       - run: npm test -- --coverage
 
   k6:
-   runs-on: ubuntu-latest
-   needs: sonarqube
-   steps:
+    runs-on: ubuntu-latest
+    needs: sonarqube
+    steps:
       - uses: actions/checkout@v4
-      - uses: grafana/k6-action@v0.2.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install & Start App
+        run: |
+          npm install
+          npm start & # Jalankan aplikasi di background pakai '&'
+          npx wait-on http://localhost:3000 # Tunggu sampai server benar-benar siap
+        
+      - name: Run k6 Load Test
+        uses: grafana/k6-action@v0.2.0
         with:
           filename: loadtest/script.js
-
+          
   sonarqube:
     runs-on: ubuntu-latest
     needs: test
