@@ -36,18 +36,20 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20' # Upgrade ke 20 karena joi memintanya
 
-      - name: Install & Start App
+      - name: Install dependencies & k6
         run: |
-          npm install
-          npm start & # Jalankan aplikasi di background pakai '&'
-          npx wait-on http://localhost:3000 # Tunggu sampai server benar-benar siap
-        
-      - name: Run k6 Load Test
-        uses: grafana/k6-action@v0.2.0
-        with:
-          filename: loadtest/script.js
+          npm ci
+          # Install k6 langsung di runner (bukan Docker)
+          curl https://github.com -L | tar -xz --strip-components 1
+          sudo mv k6 /usr/local/bin/
+
+      - name: Start App & Run Load Test
+        run: |
+          npm start & 
+          npx wait-on http://localhost:3000 --timeout 60000
+          k6 run loadtest/script.js
           
   sonarqube:
     runs-on: ubuntu-latest
