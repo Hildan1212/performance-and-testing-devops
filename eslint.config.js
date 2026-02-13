@@ -16,7 +16,7 @@ module.exports = [
     jest: true
   },
   globals: {
-    __ENV: "readonlyjomoks"
+    __ENV: "readonly"
   },
   rules: {
       "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
