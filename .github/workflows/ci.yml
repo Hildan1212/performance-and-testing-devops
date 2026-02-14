@@ -29,11 +29,26 @@ jobs:
       - run: npm test -- --coverage
 
   k6:
-    runs-on: ubuntu-latest
-    needs: sonarqube
-    steps:
+      runs-on: ubuntu-latest
+      needs: sonarqube
+      steps:
       - uses: actions/checkout@v4
-      - uses: grafana/k6-action@v0.2.0
+  
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+  
+      - name: Install dependencies
+        run: npm install
+  
+      - name: Start app
+        run: |
+          npm start &
+          sleep 10
+  
+      - name: Run k6 Load Test
+        uses: grafana/k6-action@v0.2.0
         with:
           filename: loadtest/script.js
           
